@@ -67,7 +67,7 @@ namespace HelpDesk.Controllers
             return CreatedAtAction(nameof(GetTicketById), new { id = newTicket.Id }, (CreateTicketResponse)newTicket);
         }
 
-        [HttpPut("{id}")] // tem que testar ainda
+        [HttpPut("{id}")] // tem que testar ainda -
         public async Task<IActionResult> UpdateTicket(int id, UpdateTicketRequest request, CancellationToken cancellationToken = default)
         {
             try
