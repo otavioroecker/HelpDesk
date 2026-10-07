@@ -67,34 +67,30 @@ namespace HelpDesk.Controllers
             return CreatedAtAction(nameof(GetTicketById), new { id = newTicket.Id }, (CreateTicketResponse)newTicket);
         }
 
-        [HttpPut("{id}")] // tem que testar ainda -
-        public async Task<IActionResult> UpdateTicket(int id, UpdateTicketRequest request, CancellationToken cancellationToken = default)
+        [HttpPut("{id}")] 
+        public async Task<IActionResult> UpdateTicket(int id, UpdateToCloseTicketRequest request)
         {
-            try
+
+            var ticket = await _context.Tickets.FindAsync(id);
+
+            if (ticket == null)
+                return NotFound();
+
+
+            if (string.IsNullOrWhiteSpace(request.Resolution))
             {
-                var ticket = await _context.Tickets.AsNoTracking().Where(t => t.Id == id).FirstOrDefaultAsync(cancellationToken);
-                if (ticket is null)
-                {
-                    return NotFound();
-                }
-
-                Ticket newTicket = request;
-                newTicket.Id = id;
-                newTicket.Status = ticket.Status;
-                newTicket.Resolution = ticket.Resolution;
-
-                _context.Tickets.Entry(newTicket).State = EntityState.Modified;
-                _context.SaveChanges();
-
-                return NoContent();
+                return BadRequest("Precisa ser adicionado uma resolução para o chamado ser encerrado");
             }
-            catch(Exception ex) 
+            else
             {
-                return BadRequest();
+                ticket.Resolution = request.Resolution;
+                ticket.Status = "Fechado";
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}")] // verificar se nao tem uma maneira de só utilizar true ou false para detectar o ticket, pq como ta ele mostra todo o ticket.
         public async Task<IActionResult> DeleteTicket(int id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
@@ -113,3 +109,6 @@ namespace HelpDesk.Controllers
         }
     }
 }
+
+// Notes
+// ctrl + m | solta | ctrl + o | isso encolhe o codigo
