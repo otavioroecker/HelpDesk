@@ -58,7 +58,7 @@ namespace HelpDesk.Controllers
             }
         }
 
-        [HttpPost] 
+        [HttpPost]
         public async Task<ActionResult<Ticket>> CreateTicket(CreateTicketRequest ticket)
         {
             var newTicket = _context.Tickets.Add(ticket).Entity;
@@ -67,28 +67,30 @@ namespace HelpDesk.Controllers
             return CreatedAtAction(nameof(GetTicketById), new { id = newTicket.Id }, (CreateTicketResponse)newTicket);
         }
 
-        [HttpPut("{id}")] 
+        [HttpPut("{id}")]
         public async Task<IActionResult> CloseTicket(int id, CloseTicketRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Resolution))
             {
-                return BadRequest("Precisa ser adicionado uma resolução para o chamado ser encerrado");
+                return BadRequest("Needs to be added one resolution for the ticket be closed");
             }
 
             var ticket = await _context.Tickets.FindAsync(id);
 
             if (ticket == null)
-                return NotFound();
+            {
+                return NotFound("Ticket not found");
+            }
 
             if (!string.IsNullOrWhiteSpace(ticket.Resolution))
-                {
-                    return Conflict();
-                }
+            {
+                return Conflict("This ticket was already closed");
+            }
 
-                ticket.Resolution = request.Resolution;
-                ticket.Status = "Fechado";
-                await _context.SaveChangesAsync();
-                return NoContent();
+            ticket.Resolution = request.Resolution.Trim();
+            ticket.Status = "Fechado";
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         [HttpDelete("{id}")] // verificar se nao tem uma maneira de só utilizar true ou false para detectar o ticket, pq como ta ele mostra todo o ticket.
