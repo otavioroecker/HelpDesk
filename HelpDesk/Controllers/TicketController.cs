@@ -20,7 +20,7 @@ namespace HelpDesk.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("GetAllTickets")]
         public async Task<ActionResult<IEnumerable<GetAllTicketsResponse>>> GetAllTickets()
         {
             var tickets = await _context.Tickets.ToListAsync();
@@ -35,7 +35,7 @@ namespace HelpDesk.Controllers
             return Ok(responseTickets);
         }
 
-        [HttpGet("AllInfos")]
+        [HttpGet("AllInfos-ADM")]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetAllTicketsAdm()
         {
             var tickets = await _context.Tickets.ToListAsync();
@@ -43,7 +43,7 @@ namespace HelpDesk.Controllers
             return Ok(tickets);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetTicketById/{id}")]
         public async Task<ActionResult<GetTicketByIdResponse>> GetTicketById(int id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
@@ -58,7 +58,7 @@ namespace HelpDesk.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("CreateTicket")]
         public async Task<ActionResult<Ticket>> CreateTicket(CreateTicketRequest ticket)
         {
             var newTicket = _context.Tickets.Add(ticket).Entity;
@@ -67,7 +67,7 @@ namespace HelpDesk.Controllers
             return CreatedAtAction(nameof(GetTicketById), new { id = newTicket.Id }, (CreateTicketResponse)newTicket);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("CloseTicket/{id}")]
         public async Task<IActionResult> CloseTicket(int id, CloseTicketRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Resolution))
@@ -88,12 +88,12 @@ namespace HelpDesk.Controllers
             }
 
             ticket.Resolution = request.Resolution.Trim();
-            ticket.Status = "Fechado";
+            ticket.Status = "Closed";
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        [HttpDelete("{id}")] // verificar se nao tem uma maneira de só utilizar true ou false para detectar o ticket, pq como ta ele mostra todo o ticket.
+        [HttpDelete("DeleteTicket/{id}")] // verificar se nao tem uma maneira de só utilizar true ou false para detectar o ticket, pq como ta ele mostra todo o ticket.
         public async Task<IActionResult> DeleteTicket(int id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
